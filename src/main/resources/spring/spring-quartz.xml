@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans    
+    http://www.springframework.org/schema/beans/spring-beans-3.0.xsd    
+    http://www.springframework.org/schema/tx    
+    http://www.springframework.org/schema/tx/spring-tx-3.0.xsd   
+    http://www.springframework.org/schema/context   
+    http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+	<!-- <task:annotation-driven /> 当 Spring 容器启动时，AutowiredAnnotationBeanPostProcessor 
+		将扫描 Spring 容器中所有 Bean，当发现 Bean 中拥有@Autowired 注释时就找到和其匹配（默认按类型匹配）的 Bean，并注入到对应的地方中去。 
+		<context:annotation-config/> <bean class="org.springframework.beans.factory.annotation.AutowiredAnnotationBeanPostProcessor"/> 
+		<context:component-scan base-package="com.ai.plmscore.task"/> -->
+	<!-- ======================== 调度工厂 ======================== -->
+	<bean id="SpringJobSchedulerFactoryBean"
+		class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+			  
+			    <!--
+				<ref bean="takeFtpPhoneTaskTrigger" />
+				-->
+				<ref bean="scanTaskTrigger"/>
+				
+			</list>
+		</property>
+	</bean>
+	<!-- ======================== 调度触发器 ======================== -->
+
+	<!--获取审核不通过图片 昨天17:00-今天17:00 -->
+	<!-- <bean id="takeFtpPhoneTaskTrigger"
+		class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="jobDetail" ref="takeFtpPhoneTaskJobDetail" />
+		<property name="cronExpression" value="0 0 22 ? * *" />
+	</bean>
+
+	<bean id="takeFtpPhoneTaskJobDetail"
+		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject" ref="takePhoneByProvinceTask" />
+		<property name="targetMethod" value="task" />
+		<property name="concurrent" value="false" />
+	</bean> -->
+	<bean id="printCallDateToFileTask" class="com.tuxt.itemcore.quartz.PrintCallDateToFileTask" scope="prototype"></bean>
+ 	<!-- 扫描Task -->
+	<bean name="scanTaskJobDetail"
+		class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+		<property name="name" value="job_scanTask"/>
+		<property name="group" value="job_scanGroup" />
+		<property name="durability" value="true"></property>
+		<property name="jobClass" value="com.tuxt.itemcore.quartz.ScanAllTaskJob" />
+	</bean>
+
+	<bean id="scanTaskTrigger"
+		class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+		<property name="name" value="trigger_scanTask" />
+		<property name="group" value="trigger_scanGroup" />
+		<property name="jobDetail">
+			<ref bean="scanTaskJobDetail" />
+		</property>
+		<property name="cronExpression">
+			<value>0 0/2 * * * ?</value>
+		</property>
+	</bean>
+	
+
+</beans>

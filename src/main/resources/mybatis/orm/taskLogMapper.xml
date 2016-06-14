@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="taskLogDao">
+	<select id="checkTaskLogTableExist" resultType="java.lang.Integer">
+		select count(1)
+		from db_ap_rgsh_tasklog where
+		1=2
+	</select>
+
+	<insert id="createTaskLogTable" parameterType="java.util.Map">
+		CREATE TABLE `db_ap_rgsh_tasklog` (
+		`id` int(11) NOT NULL AUTO_INCREMENT,
+		`task_en_name` varchar(65) DEFAULT NULL COMMENT 'task名称',
+		`task_result` varchar(1500) DEFAULT NULL COMMENT 'task结果',
+		`task_param` varchar(300) DEFAULT NULL COMMENT 'task参数',
+		`create_date` datetime NOT NULL COMMENT '运行时间',
+		`state` varchar(2) DEFAULT NULL COMMENT '状态(C,为正在执行中;F,为正常执行完成;X,为异常执行完成)',
+		PRIMARY KEY (`id`),
+		KEY `idx_rgsh_taskcreatedate` (`create_date`)
+		) ENGINE=InnoDB DEFAULT CHARSET=utf8
+	</insert>
+
+
+	<insert id="insertTaskLogRecord" parameterType="java.util.Map">
+		insert into db_ap_rgsh_tasklog(task_en_name,task_result,task_param,create_date,state)
+		values(#{taskEnName},#{taskResult},#{taskParam},str_to_date(#{createDate}
+		, '%Y-%m-%d %H:%i:%s'),#{state})
+	</insert>
+	
+	
+</mapper>
+
+
+
+
