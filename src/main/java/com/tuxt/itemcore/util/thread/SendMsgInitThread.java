@@ -58,7 +58,7 @@ public class SendMsgInitThread extends Thread{
 						}
 					}
 				}
-				while (todo.size()>10) {
+				if (todo.size()>10) {
 					System.out.println("startSleep");
 					try {
 						Thread.sleep(1000);
@@ -68,6 +68,13 @@ public class SendMsgInitThread extends Thread{
 				}
 			}else {
 				System.out.println("noData startSleep");
+				System.out.println(todo.size());
+				if (todo.size()>0) {
+					System.out.println("-----process error data-----");
+					for (Integer itemid : todo) {
+						System.out.println(itemid);
+					}
+				}
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {

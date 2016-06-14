@@ -92,9 +92,15 @@ public class ItemServiceImpl extends BaseServiceImpl implements IItemService{
 	}
 	public Integer processItem(Map<String, Object> map) {
 		try {
+			/*if (map.get("title").equals("title25")) {
+				throw new RuntimeException("title25");
+			}*/
 			getBaseDao().update(NAMESPACE, "processItem", map);
 			Thread.sleep(500);
 		} catch (Exception e) {
+		}
+		if (map.get("title").equals("title25")) {
+			throw new RuntimeException("title25");
 		}
 		return  (Integer) map.get("itemid");
 	}
