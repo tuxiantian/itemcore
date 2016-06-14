@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="user">
+	
+	<select id="queryUser" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		select * from user where 1=1 and username=#{username} and password=#{password} limit 1
+	</select>
+	<!-- 根据用户查询菜单(新) -->
+	<select id="query_menu_new" resultType="java.util.Map" parameterType="java.util.Map">
+	   SELECT
+		a.ID,
+		MENU_ID,
+		ROLE_ID,
+		t.NAME tit,
+		t.PATH tpl
+	FROM
+		menu_role a
+	LEFT JOIN menu t ON a.MENU_ID = t.ID
+	WHERE
+		a.ROLE_ID IN (
+			SELECT
+				ROLE_ID
+			FROM
+				user_role
+			WHERE
+				USER_ID = #{userId}
+		)
+	AND t.STATE = '0'
+	</select>
+</mapper>

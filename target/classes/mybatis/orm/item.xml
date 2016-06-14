@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="item">
+	
+	<select id="getItems" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		select t.`itemid`,t.`title`,t.`detail`,t.`status`,c.`categoryName` from items t,`itemcategories` c where 1=1 and t.`category`=c.`id`
+		<include refid="getItemsCondition"></include>
+		limit ${start},${length}
+	</select>
+	<sql id="getItemsCondition">
+	<if test="category!=null and category!=''">
+		and c.`categoryName`=#{category}
+		</if>
+	</sql>
+	<select id="queryItemsCount" parameterType="java.util.Map"
+		resultType="Integer">
+		select count(1) from items t,`itemcategories` c where 1=1 and t.`category`=c.`id`
+		<include refid="getItemsCondition"></include>
+	</select>
+	<select id="queryNoProcess" resultType="java.util.Map">
+	select * from items where isProcess='0' limit 50;
+	</select>
+	<update id="processItem" parameterType="java.util.Map">
+	update items set isProcess='1' where itemid=#{itemid}
+	</update>
+	<select id="queryItemForMake" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		select itemid,personCode,makeDate from items where makeDate is null
+	</select>
+	<select id="queryItemByKey" parameterType="java.util.Map"
+	resultType="java.util.Map">
+	select * from items where itemId=#{itemId}
+	</select>
+	<update id="markItems" parameterType="java.util.List">
+		<foreach collection="list" item="item" index="index" open=""
+			close="" separator=";">
+			UPDATE items
+			<set>
+				personCode = #{item.personCode},
+				makeDate = #{item.makeDate}
+			</set>
+			WHERE itemid = #{item.itemid}
+		</foreach>
+	</update>
+	<update id="cleanMarkItems" parameterType="java.util.Map">
+	UPDATE items set personCode=null,makeDate=null where personCode="sys"
+	</update>
+	<update id="auditItem" parameterType="java.util.Map">
+	update items
+	<set>
+	personCode=#{personCode}
+	</set>
+	where itemId=#{itemId}
+	</update>
+	<update id="updateItem" parameterType="java.util.Map">
+	update items
+	<set>
+				title = #{title},
+	<!-- <if test="title != null and title != 'null' and title != ''">
+			</if> -->
+			<if test="detail != null and detail != 'null' and detail != ''">
+				detail = #{detail},
+			</if>
+			<if test="status != null and status != 'null' and status != ''">
+				status = #{status}
+			</if>
+	</set>
+	where itemId=#{itemId}
+	</update>
+</mapper>

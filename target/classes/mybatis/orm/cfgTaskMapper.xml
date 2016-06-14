@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cfgTaskDao">
+    <select id="getCfgTaskList" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		select concat(id,'') as taskId,
+               ifnull(task_expr,'') as taskExpr,
+               ifnull(task_run_type,'') taskRunType
+        from db_ap_rgsh_cfg_task
+        where state='U'
+        order by taskRunType,sort_id desc
+	</select>	
+    
+	<select id="getCfgTaskDtl" parameterType="java.util.Map"
+		resultType="java.util.Map">
+      select ifnull(task_name,'') as taskName,
+             ifnull(task_code,'') as taskCode,
+             ifnull(busi_class,'') as busiClass,
+             ifnull(busi_method,'') as busiMethod,
+             ifnull(task_expr,'') as taskExpr,
+             ifnull(task_run_type,'') taskRunType
+      from db_ap_rgsh_cfg_task
+      where state='U'
+      and id=#{id}
+	</select>
+	
+</mapper>
+
+
+
+
