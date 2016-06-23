@@ -1,5 +1,7 @@
 package com.tuxt.itemcore.util;
 
+import org.apache.commons.lang3.StringUtils;
+
 
 
 
@@ -9,7 +11,7 @@ package com.tuxt.itemcore.util;
  * @author 
  * @since 2015-03-17 21:09:43
  */
-public final class StringUtil {
+public final class StringUtil extends StringUtils{
 	/** Private Constructor **/
 	private StringUtil(){
 	}
@@ -43,10 +45,6 @@ public final class StringUtil {
 		return trim(str, "");
 	}
 	
-	public static String trim(String str, String defStr) {
-		return (str == null) || ("null".equals(str)) ? defStr : str.trim();
-	}
-	
 	public static String delStrAllQuo(String str,int length) {
 		if (StringUtil.isEmptyExcludeNull(str)) {
 			return "";
@@ -61,7 +59,40 @@ public final class StringUtil {
 	public static String trim2Empty(String str) {
 		return isEmpty(str) ? "" : str.trim();
 	}
-	public static void main(String[] args) {
-		
+	/**
+     * <p>Removes a substring if it is at the start or end of a source string,
+     * otherwise returns the source string.</p>
+     *
+     * <p>A {@code null} source string will return {@code null}.
+     * An empty ("") source string will return the empty string.
+     * A {@code null} search string will return the source string.</p>
+     *
+     * <pre>
+     * StringUtil.trim("|a|b|", "|")      = "a|b"
+     * StringUtil.trim("", *)        = ""
+     * StringUtil.trim(*, null)      = *
+     * StringUtil.trim("www.domain.com", ".com.")  = "www.domain.com"
+     * StringUtil.trim("www.domain.com", ".com")   = "www.domain"
+     * StringUtil.trim("www.domain.com", "domain") = "www.domain.com"
+     * StringUtil.trim("abc", "")    = "abc"
+     * </pre>
+     *
+     * @param str  the source String to search, may be null
+     * @param remove  the String to search for and remove, may be null
+     * @return the substring with the string removed if found,
+     *  {@code null} if null String input
+     * @since 2.1
+     */
+	public static String trim(String str, final String remove) {
+		if (isEmpty(str) || isEmpty(remove)) {
+            return str;
+        }
+        if (str.startsWith(remove)){
+        	str=str.substring(remove.length());
+        }
+        if (str.endsWith(remove)) {
+        	str=str.substring(0, str.length() - remove.length());
+        }
+        return str;
 	}
 }
