@@ -22,6 +22,7 @@
 		<property name="baseDao" ref="baseDao" />
 	</bean>
 	
+	<bean id="ftpService" class="com.tuxt.itemcore.service.impl.FtpServiceImpl" parent="baseService"></bean>
 	<bean id="loginService" class="com.tuxt.itemcore.service.impl.LoginServiceImpl" parent="baseService"></bean>
 	<bean id="itemService" class="com.tuxt.itemcore.service.impl.ItemServiceImpl" parent="baseService">
 	<property name="asyncService" ref="asyncService"></property>

@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.net.ftp.FTP;
@@ -18,6 +19,7 @@ import org.apache.commons.net.ftp.FTPReply;
 
 import com.ai.frame.logger.Logger;
 import com.ai.frame.logger.LoggerFactory;
+import com.tuxt.itemcore.service.IFtpService;
 
 //下载后关闭流 completePendingCommand 关闭ftp
 //上传前 连接 bin
@@ -28,7 +30,6 @@ public class FtpUtil {
 	public static final int ASC = 1;
 	protected FTPClient client = null;
 	private String localPath = null;
-	// add by lxm 08-10-27
 	private String remotePathHis;
 	private String _host = null;
 	private int _port = 0;
@@ -38,31 +39,32 @@ public class FtpUtil {
 	private String _localPath = null;
 	private String _localPathTemp = null;
 	private String _part = null;
-
-	public FtpUtil(String ftpValueHostIp, int ftpValuePort, String ftpValueUsername, String ftpValuePassword,
-			String ftpPathRemotePath, String ftpPathLocalPath, String ftpPathRemotePathHis, String ftpPathLocalPathTemp)
-			throws Exception {
-		client = new FTPClient();
-		client.connect(ftpValueHostIp, ftpValuePort);
-		client.login(ftpValueUsername, ftpValuePassword);
-		int reply = client.getReplyCode();
+	
+	public FtpUtil(String ftpPathCode) throws Exception {
+		IFtpService ftpService=(IFtpService) SpringApplicationUtil.getBean("ftpService");
+		Map<String, Object> cfgFtpPath=ftpService.queryCfgFtpPath(ftpPathCode);
+		Map<String, Object> cfgFtpPart=ftpService.queryCfgFtpPart(String.valueOf(cfgFtpPath.get("cfgFtpCode")));
+	    client = new FTPClient();
+	    client.connect(String.valueOf(cfgFtpPart.get("hostIp")),Integer.parseInt(String.valueOf(cfgFtpPart.get("port"))));
+	    client.login(String.valueOf(cfgFtpPart.get("username")), String.valueOf(cfgFtpPart.get("password")));
+	    int reply = client.getReplyCode();
 		if (!FTPReply.isPositiveCompletion(reply)) {
 			client.disconnect();
 			throw new Exception("登录FTP失败");
 		}
-		client.changeWorkingDirectory(ftpPathRemotePath);
-		localPath = ftpPathLocalPath;
-		remotePathHis = ftpPathRemotePathHis;// add by lxm
-		// add by huangyb
-		_host = ftpValueHostIp;
-		_port = ftpValuePort;
-		_username = ftpValueUsername;
-		_password = ftpValuePassword;
-		_remotePath = ftpPathRemotePath;
-		_localPath = ftpPathLocalPath;
-		_localPathTemp = ftpPathLocalPathTemp;
-	}
-
+	    client.changeWorkingDirectory(String.valueOf(cfgFtpPart.get("remotePath")));
+	    _host = String.valueOf(cfgFtpPart.get("hostIp"));
+	    _port = Integer.parseInt(String.valueOf(cfgFtpPart.get("port")));
+	    _username = String.valueOf(cfgFtpPart.get("username"));
+	    _password = String.valueOf(cfgFtpPart.get("password"));
+	    _part = String.valueOf(cfgFtpPart.get("part"));
+	    
+	    localPath = String.valueOf(cfgFtpPath.get("localPath"));
+	    remotePathHis = String.valueOf(cfgFtpPath.get("remotePathHis"));
+	    _remotePath = String.valueOf(cfgFtpPath.get("remotePath"));
+	    _localPath = String.valueOf(cfgFtpPath.get("localPath"));
+	    _localPathTemp = String.valueOf(cfgFtpPath.get("localPathTemp"));
+  }
 	public String getPart() {
 		return _part;
 	}

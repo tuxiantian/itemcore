@@ -25,6 +25,7 @@
 		<mapper resource="mybatis/orm/dictionary.xml" />
 		<mapper resource="mybatis/orm/cfgTaskMapper.xml" />
 		<mapper resource="mybatis/orm/taskLogMapper.xml" />
+		<mapper resource="mybatis/orm/ftpMapper.xml" />
 	</mappers>
 	
 </configuration>

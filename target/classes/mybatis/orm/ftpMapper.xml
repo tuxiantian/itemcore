@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="ftp">
+
+<select id="queryCfgFtpPath"  parameterType="java.util.Map" resultType="java.util.Map">
+select cfg_ftp_path_code as cfgFtpPathCode,cfg_ftp_code as cfgFtpCode,remote_path as remotePath,remote_path_his as remotePathHis,
+remote_path_temp remotePathTemp,local_path as localPath,local_path_his as localPathHis,local_path_temp as localPathTemp
+from cfg_ftp_path  where cfg_ftp_path_code=#{ftpPathCode} and state='U'
+</select>
+<select id="queryCfgFtpPart"  parameterType="java.util.Map" resultType="java.util.Map">
+select cfg_ftp_code as cfgFtpCode,part ,host_ip as hostIp,port,username,password,state from cfg_ftp_part 
+where cfg_ftp_code=#{cfgFtpCode} and state=#{state}
+
+</select>
+</mapper>
+
+			
