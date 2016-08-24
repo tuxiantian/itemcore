@@ -8,6 +8,11 @@
 		<include refid="getItemsCondition"></include>
 		limit ${start},${length}
 	</select>
+	<select id="exportItemByCdt" parameterType="java.util.Map"
+		resultType="java.util.Map">
+		select t.`itemid`,t.`title`,t.`detail`,t.`status`,c.`categoryName` from items t,`itemcategories` c where 1=1 and t.`category`=c.`id`
+		<include refid="getItemsCondition"></include>
+	</select>
 	<sql id="getItemsCondition">
 	<if test="category!=null and category!=''">
 		and c.`categoryName`=#{category}

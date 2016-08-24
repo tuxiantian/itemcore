@@ -30,15 +30,36 @@ public class ItemServiceImpl extends BaseServiceImpl implements IItemService{
 				List<Map<String, Object>> beans=getBaseDao().query(NAMESPACE, "getItems", paramData);
 				if (!beans.isEmpty()) {
 					outputObject.setBeans(beans);
-					outputObject.setReturnCode(ControlConstants.RETURN_CODE.IS_OK);
-					outputObject.setReturnMessage("success");
 				}
 			}
+			outputObject.setReturnCode(ControlConstants.RETURN_CODE.IS_OK);
+			outputObject.setReturnMessage("success");
 		} catch (Exception e) {
 			outputObject.setReturnCode(ControlConstants.RETURN_CODE.SYSTEM_ERROR);
 			outputObject.setReturnMessage("查询出错了");
 		}
 		return outputObject;
+	}
+	public void exportItemByCdt(InputObject inputObject,
+			OutputObject outputObject) {
+		try {
+			Map<String, Object> paramData=inputObject.getParams();
+			List<Map<String, Object>> beans=getBaseDao().query(NAMESPACE, "exportItemByCdt", paramData);
+			String excel_head_cnname="编号,标题,内容,状态,类别",
+					excel_data_cellSize="20,20,20,20,20",
+					excel_data_enname="itemid,title,detail,status,categoryName";
+			outputObject.getBean().put("excel_head_cnname", excel_head_cnname);
+			outputObject.getBean().put("excel_data_cellSize", excel_data_cellSize);
+			outputObject.getBean().put("excel_data_enname",excel_data_enname );
+			if (!beans.isEmpty()) {
+				outputObject.setBeans(beans);
+			}
+			outputObject.setReturnCode(ControlConstants.RETURN_CODE.IS_OK);
+			outputObject.setReturnMessage("success");
+		} catch (Exception e) {
+			outputObject.setReturnCode(ControlConstants.RETURN_CODE.SYSTEM_ERROR);
+			outputObject.setReturnMessage("查询出错了");
+		}
 	}
 	public OutputObject queryItemByKey(InputObject inputObject,
 			OutputObject outputObject) {

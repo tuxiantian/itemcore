@@ -19,4 +19,6 @@ public interface IItemService {
 	public List<Map<String, Object>> queryNoProcess();
 	
 	public Integer processItem(Map<String, Object> map);
+	public void exportItemByCdt(InputObject inputObject,
+			OutputObject outputObject);
 }
