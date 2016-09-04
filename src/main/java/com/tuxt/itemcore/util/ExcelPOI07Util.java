@@ -1,11 +1,17 @@
 package com.tuxt.itemcore.util;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
@@ -14,6 +20,9 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import com.ai.frame.bean.OutputObject;
@@ -27,9 +36,9 @@ public class ExcelPOI07Util {
 			int startR = 0;
 			Map<String, CellStyle> styleMap = createStyles(wb);
 			if (!StringUtil.isEmpty(headStr)) {
-				
+
 				CellStyle headStyle = styleMap.get("sheet_title_style");
-				
+
 				String[] headArr = headStr.split(",");
 				String cellSizeStr = (String) outObj.getBean().get("excel_data_cellSize");//宽度
 				if (!StringUtil.isEmpty(cellSizeStr)) {
@@ -64,14 +73,14 @@ public class ExcelPOI07Util {
 				CellStyle headStyle = styleMap.get("newsheet_title_style");
 				String[] headArr = headStr.split(",");
 				String cellSizeStr = (String) outObj.getBean().get("excel_data_cellSize");//宽度
-				
+
 				if (!StringUtil.isEmpty(cellSizeStr)) {
 					startR = createExcelHeadMergeCells(sheet, startR, headArr, cellSizeStr.split(","), headStyle);
 				} else {
 					startR = createExcelHeadMergeCells(sheet, startR, headArr,null, headStyle);
 				}
 			}
-			
+
 			String dataNameStr = (String) outObj.getBean().get("excel_data_enname");//内容
 			if (!StringUtil.isEmpty(dataNameStr)) {
 				CellStyle cellStyle = styleMap.get("cell_normal_style");
@@ -84,7 +93,7 @@ public class ExcelPOI07Util {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public static void createExcelBody(Sheet sheet, int startR, String[] dataEnNameArr,
 			List<Map<String, Object>> dataList, CellStyle normalCellStyle) throws Exception {
 		for (int i = 0, len = dataList.size(); i < len; i++) {
@@ -125,7 +134,7 @@ public class ExcelPOI07Util {
 		int HeadRowCnt = 0, tmpval;
 		for (int i = 0; i < headArr.length - 1; i++) {
 			tmpval = headArr[i].split("\\|").length;
-			
+
 			if (tmpval > HeadRowCnt){
 				HeadRowCnt = tmpval;
 			}
@@ -231,7 +240,60 @@ public class ExcelPOI07Util {
 		}
 		return HeadRowCnt;
 	}
-	
+	/**
+	 * 读取Office 2007 excel,默认第一行为标题，第二行为数据
+	 * @param inputStream
+	 * @param encolumnName 列名，对应map中的key
+	 * @return
+	 * @throws IOException
+	 */
+	public static List<Map<String,Object>> read2007Excel(InputStream inputStream,String[] encolumnName)
+			throws IOException {
+		List<Map<String,Object>> datas = new ArrayList<>();
+		// 构造 XSSFWorkbook 对象，strPath 传入文件路径
+		XSSFWorkbook xwb = new XSSFWorkbook(inputStream);
+		// 读取第一章表格内容
+		XSSFSheet sheet = xwb.getSheetAt(0);
+		Object value = null;
+		XSSFRow row = null;
+		XSSFCell cell = null;
+		for (int i = sheet.getFirstRowNum()+1,len=sheet
+				.getPhysicalNumberOfRows(); i <len ; i++) {
+			row = sheet.getRow(i);
+			Map<String,Object> rowMap = new HashMap<>();
+			for (int j = row.getFirstCellNum(),lenJ= row.getLastCellNum(); j <lenJ; j++) {
+				cell = row.getCell(j);
+				DecimalFormat df = new DecimalFormat("0");// 格式化 number String字符
+				SimpleDateFormat sdf = new SimpleDateFormat(
+						"yyyy-MM-dd HH:mm:ss");// 格式化日期字符串
+				switch (cell.getCellType()) {
+				case XSSFCell.CELL_TYPE_STRING:
+					value = cell.getStringCellValue();
+					break;
+				case XSSFCell.CELL_TYPE_NUMERIC:
+					if ("General".equals(cell.getCellStyle()
+							.getDataFormatString())||"@".equals(cell.getCellStyle().getDataFormatString())) {
+						value = df.format(cell.getNumericCellValue());
+					}  else {
+						value = sdf.format(HSSFDateUtil.getJavaDate(cell
+								.getNumericCellValue()));
+					}
+					break;
+				case XSSFCell.CELL_TYPE_BOOLEAN:
+					value = cell.getBooleanCellValue();
+					break;
+				case XSSFCell.CELL_TYPE_BLANK:
+					value = "";
+					break;
+				default:
+					value = cell.toString();
+				}
+				rowMap.put(encolumnName[j], value);
+			}
+			datas.add(rowMap);
+		}
+		return datas;
+	}
 	public static void createExcelHeadNormal(Sheet sheet, int startR, String[] headArr, String[] cellSizeArr,
 			CellStyle headStyle) throws Exception {
 		Row row = sheet.createRow(startR);
@@ -252,13 +314,13 @@ public class ExcelPOI07Util {
 		}catch(Exception e){
 			return defaultVal;
 		}
-		
+
 	}
-	
+
 	// 创建Excel样式
 	private static Map<String, CellStyle> createStyles(Workbook wb) {
 		Map<String, CellStyle> stylesMap = new HashMap<String, CellStyle>();
-		
+
 		CellStyle style = wb.createCellStyle();
 		style.setAlignment(CellStyle.ALIGN_CENTER);
 		style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
@@ -269,7 +331,7 @@ public class ExcelPOI07Util {
 		sheetFont.setFontName("宋体");
 		sheetFont.setFontHeightInPoints((short) 12);
 		sheetFont.setBoldweight(Font.BOLDWEIGHT_BOLD);
-		
+
 		style = wb.createCellStyle();
 		style.setFont(sheetFont);
 		style.setWrapText(true);
@@ -278,15 +340,15 @@ public class ExcelPOI07Util {
 		style.setAlignment(CellStyle.ALIGN_CENTER);
 		style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
 		stylesMap.put("sheet_title_style", style);
-		
+
 		style = wb.createCellStyle();
 		style.setFont(sheetFont);
 		style.setWrapText(true);
 		style.setAlignment(CellStyle.ALIGN_CENTER);
 		style.setVerticalAlignment(CellStyle.VERTICAL_CENTER);
 		stylesMap.put("newsheet_title_style", style);
-		
+
 		return stylesMap;
 	}
-	
+
 }

@@ -1,7 +1,10 @@
 package com.tuxt.itemcore.util;
 
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,5 +37,11 @@ public class ExcelPOI07UtilTest {
 		ExcelPOI07Util.createExcel2007MergeCells(out, outObj);
 		
 	}
-
+	@Test
+	public void testRead2007Excel() throws IOException {
+		InputStream inputStream=new FileInputStream("E:/test/test.xlsx");
+		String[] encolumnName={"a","b","c","d","e","f","g"};
+		List<Map<String, Object>> datas=ExcelPOI07Util.read2007Excel(inputStream, encolumnName);
+		System.out.println(datas);
+	}
 }
