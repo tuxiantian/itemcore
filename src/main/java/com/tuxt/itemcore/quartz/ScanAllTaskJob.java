@@ -47,9 +47,9 @@ public class ScanAllTaskJob implements Job {
 		log.info("ScanAllTaskJob", "扫描任务执行");
 		cfgTaskService = (ICfgTaskService) SpringApplicationUtil.getBean("cfgTaskService");
 		Map<String, Object> queryMap = new HashMap<String, Object>();
-		List<Map<String, Object>> rtnList = cfgTaskService.getCfgTaskList(queryMap);
-		if (rtnList == null || rtnList.size() == 0) {
-			log.info("ScanAllTaskJob", "扫描到符合要求的任务为零,删除所有任务");
+		List<Map<String, Object>> tasks = cfgTaskService.getCfgTaskList(queryMap);
+		if (tasks == null || tasks.size() == 0) {
+			log.info("ScanAllTaskJob", "扫描到符合要求的任务为零,删除所有完成的任务");
 		}
 		Scheduler scheduler = context.getScheduler();
 		List<JobKey> allJobKeyList = new ArrayList<JobKey>();
@@ -70,11 +70,11 @@ public class ScanAllTaskJob implements Job {
 		}
 		List<JobKey> runJobKeyList = getAllRunningJobKey(executeJobList);
 		removeAllNotRunJob(scheduler, runJobKeyList, allJobKeyList);
-		if (rtnList == null || rtnList.size() == 0) {
+		if (tasks == null || tasks.size() == 0) {
 			return;
 		}
 		try {
-			for (Map<String, Object> map : rtnList) {
+			for (Map<String, Object> map : tasks) {
 				String taskId = map.get("taskId").toString();
 				String jobNameStr = JOB_PREFIX + taskId;
 				String triggerNameStr = TRIGGER_PREFIX + taskId;
@@ -127,10 +127,7 @@ public class ScanAllTaskJob implements Job {
 						}
 						// 固定时间执行
 						Date startDate = DateUtil.string2Date(taskExpr, DateUtil.DATE_PATTERN.YYYY_MM_DD_HH_MM_SS);
-						if (startDate == null) {
-							continue;
-						}
-						if (startDate.before(new Date())) {
+						if (startDate == null||startDate.before(new Date())) {
 							continue;
 						}
 						Trigger trigger = TriggerBuilder.newTrigger().withIdentity(triggerKey)

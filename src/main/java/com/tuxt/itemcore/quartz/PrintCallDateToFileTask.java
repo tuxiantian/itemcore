@@ -10,7 +10,7 @@ import com.tuxt.itemcore.util.fileUtil.WriteFileUtil;
 
 public class PrintCallDateToFileTask {
 	private static final Logger logger = LoggerFactory.getApplicationLog(PrintCallDateToFileTask.class);
-	public void task() {
+	public void task(String taskcode) {
 		logger.info("PrintCallDateToFileTask任务开始执行", "");
 		String fileName="J:/taskdate.txt";
 		String content=DateUtil.date2String(new Date());

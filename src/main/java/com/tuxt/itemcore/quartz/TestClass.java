@@ -11,10 +11,10 @@ public class TestClass {
 			Class taskClass = Class.forName(busiClass.trim());
 			Object obj = taskClass.newInstance();
 			String busiMethod="task";
-			Method meth = obj.getClass().getDeclaredMethod(busiMethod);
+			Method meth = obj.getClass().getDeclaredMethod(busiMethod,String.class);
 			meth.setAccessible(true);
 			Object taskCode = "12";
-			meth.invoke(obj);
+			meth.invoke(obj,taskCode);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

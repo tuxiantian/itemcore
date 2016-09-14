@@ -27,5 +27,9 @@ public class Demo1 extends CycleProcessTask{
 	public void doTask(String taskcode) {
 		super.doTask(taskcode);
 	}
-
+	
+	public static void main(String[] args) {
+		Demo1 demo1=new Demo1();
+		demo1.doTask("Demo1");
+	}
 }
