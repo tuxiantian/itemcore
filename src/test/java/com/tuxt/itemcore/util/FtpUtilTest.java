@@ -22,5 +22,17 @@ public class FtpUtilTest extends BaseTest{
 			e.printStackTrace();
 		}
 	}
-
+	@Test
+	public void testMoveFileToRemoteHisDir() {
+		String ftpPathCode="OL_IMSIINFO_REMOTE";
+		try {
+			FtpUtil ftpUtil=new FtpUtil(ftpPathCode);
+			String fileName="temp.xlsx";
+			
+			ftpUtil.changeToRemoteDir();//此语句很关键
+			ftpUtil.moveFileToRemoteHisDir(fileName);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 }
