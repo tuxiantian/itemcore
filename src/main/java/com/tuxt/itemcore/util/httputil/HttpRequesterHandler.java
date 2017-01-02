@@ -2,13 +2,19 @@ package com.tuxt.itemcore.util.httputil;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.Vector;
@@ -20,23 +26,42 @@ import org.apache.commons.httpclient.methods.InputStreamRequestEntity;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.log4j.Logger;
 
-
+/**
+ * 使用该类必须设置URLConnection的超时时间，若使用空构造函数，则默认超时时间为15秒。
+ * @author Administrator
+ *
+ */
 public class HttpRequesterHandler {     
 	private static Logger logger = Logger.getLogger(HttpRequesterHandler.class);
 	private static String defaultContentEncoding;     
 	private   static   String timeout;
 
-
+	/**
+	 * Sets a specified timeout value, in <b>milliseconds</b>, to be used when opening a communications link to the resource referenced by this URLConnection. 
+	 * @param timeout
+	 */
 	public HttpRequesterHandler(String timeout) {     
 		this.setTimeout(timeout);
+		defaultContentEncoding = Charset.defaultCharset().name();
 	} 
 
 	private void setTimeout(String timeout) {
 		HttpRequesterHandler.timeout	=timeout;
 	}
-
+	
+	/**
+	 * Sets a specified timeout value, in <b>milliseconds</b>, to be used when opening a communications link to the resource referenced by this URLConnection.
+	 * @param timeout
+	 * @param contentEncoding
+	 */
+	public HttpRequesterHandler(String timeout,String contentEncoding) {     
+		this.setTimeout(timeout);
+		defaultContentEncoding = contentEncoding;
+	}
+	
 	public HttpRequesterHandler() {     
-		defaultContentEncoding = Charset.defaultCharset().name();       
+		defaultContentEncoding = Charset.defaultCharset().name();
+		timeout="15000";
 	}     
 
 
@@ -187,6 +212,148 @@ public class HttpRequesterHandler {
 		return timeout;
 	}
 	
+	/**
+	 * 既发送文本参数又发送文件。textMap中放文本参数，fileMap中放文件参数。注意fileMap中的值塞的是文件的路径。
+	 * 该方法通常用于测试。
+	 * @param urlStr 调用地址
+	 * @param textMap 文本参数
+	 * @param fileMap 文件参数
+	 * @param propertys
+	 * @return
+	 */
+	public String post(String urlStr, Map<String, String> textMap,
+			Map<String, String> fileMap,Map<String, String> propertys) {
+		String res = "";
+		HttpURLConnection conn = null;
+		String BOUNDARY = "WebKitFormBoundSmrz"; // boundary就是request头和上传文件内容的分隔符
+		boolean ismultipart;
+		if (fileMap != null && fileMap.size() > 0) {
+			ismultipart = true;
+		}else{
+			ismultipart=false;
+		}
+		try {
+			URL url = new URL(urlStr);
+			conn = (HttpURLConnection) url.openConnection();
+			conn.setConnectTimeout(Integer.valueOf(timeout));
+			conn.setReadTimeout(Integer.valueOf(timeout));
+			conn.setDoOutput(true);
+			conn.setDoInput(true);
+			conn.setUseCaches(false);
+			conn.setRequestMethod("POST");
+			conn.setRequestProperty("Connection", "Keep-Alive");
+			conn.setRequestProperty("Accept-Charset",defaultContentEncoding);
+			conn.setRequestProperty("User-Agent",
+					"Mozilla/5.0 (Windows; U; Windows NT 6.1; zh-CN; rv:1.9.2.6)");
+			if (ismultipart) {
+				conn.setRequestProperty("Content-Type",
+						"multipart/form-data; boundary=" + BOUNDARY);
+			} else {
+				conn.setRequestProperty("Content-Type",
+						"application/x-www-form-urlencoded; charset=" + defaultContentEncoding);
+			}
+			
+			if(propertys!=null){
+				for (Map.Entry<String, String> prop : propertys.entrySet()) {
+					String key=prop.getKey();
+					String value=prop.getValue();
+					if("Content-Type".equals(key)){
+						value=value+"; charset="+ defaultContentEncoding;
+					}
+					conn.setRequestProperty(key,value);
+				}
+			}
+
+			OutputStream out = new DataOutputStream(conn.getOutputStream());
+			// text
+			if (textMap != null) {
+				StringBuilder strBuf = new StringBuilder();
+				for (Map.Entry<String, String> entry: textMap.entrySet()) {
+					String inputName = entry.getKey();
+					String inputValue = entry.getValue();
+					if (inputValue == null) {
+						continue;
+					}
+				
+					String contentType=conn.getRequestProperty("Content-Type");//获取请求类型，如果是基本的类型，则转码，否则不转码
+					if(contentType==null||contentType.contains("application/x-www-form-urlencoded")){
+						inputValue=URLEncoder.encode(inputValue,defaultContentEncoding);
+					}
+					strBuf.append(inputName).append("=").append(inputValue).append("&");
+				}
+				
+				String param=strBuf.toString();
+				if(param.endsWith("&")){
+					param=param.substring(0, strBuf.length()-1);
+				}
+				out.write(param.getBytes(defaultContentEncoding));
+			}
+
+			// file
+			if (fileMap != null) {
+				for (Map.Entry<String, String> entry: fileMap.entrySet()) {
+					String inputName = entry.getKey();
+					String inputValue = entry.getValue();
+					if (inputValue == null) {
+						continue;
+					}
+					File file = new File(inputValue);
+					String filename = file.getName();
+					String contentType = "application/octet-stream";
+
+					StringBuilder strBuf = new StringBuilder();
+					strBuf.append("\r\n").append("--").append(BOUNDARY)
+							.append("\r\n");
+					strBuf.append("Content-Disposition: form-data; name=\""
+							+ inputName + "\"; filename=\"" + filename
+							+ "\"\r\n");
+					strBuf.append("Content-Type:" + contentType + "\r\n\r\n");
+					out.write(strBuf.toString().getBytes());
+
+					DataInputStream in = new DataInputStream(
+							new FileInputStream(file));
+					int bytes = 0;
+					byte[] bufferOut = new byte[1024];
+					while ((bytes = in.read(bufferOut)) != -1) {
+						out.write(bufferOut, 0, bytes);
+					}
+					String endData = "\r\n--" + BOUNDARY + "--\r\n";
+					out.write(endData.getBytes());
+					in.close();
+				}
+			}
+			
+			out.flush();
+			out.close();
+			// 读取返回数据
+			StringBuilder strBuf = new StringBuilder();
+			BufferedReader reader = new BufferedReader(new InputStreamReader(
+					conn.getInputStream(), defaultContentEncoding));
+			String line = null;
+			while ((line = reader.readLine()) != null) {
+				strBuf.append(line).append("\n");
+			}
+			res = strBuf.toString();
+			reader.close();
+			reader = null;
+		} catch (Exception e) {
+			logger.error("发送POST请求出错。"+urlStr,e);
+		} finally {
+			if (conn != null) {
+				conn.disconnect();
+				conn = null;
+			}
+		}
+		return res;
+	}
+	
+	/**
+	 * 以resful风格发送请求，直接发送json。
+	 * @param url
+	 * @param json
+	 * @param timeout
+	 * @return
+	 */
 	public String sendRestRequestJSON(String url, String json, int timeout) {
 		String result = null;
 		try {
