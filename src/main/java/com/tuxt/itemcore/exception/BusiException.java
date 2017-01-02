@@ -17,9 +17,11 @@ public class BusiException extends Exception {
 	}
 	public BusiException(Throwable cause) {
 		super(cause);
+		this.setStackTrace(cause.getStackTrace());
 	}
 	public BusiException(String message,Throwable cause) {
 		super(message,cause);
+		this.setStackTrace(cause.getStackTrace());
 	}
 	public BusiException(String exceptionId,String message) {
 		super(message);
@@ -28,5 +30,6 @@ public class BusiException extends Exception {
 	public BusiException(String exceptionId,String message,Throwable cause) {
 		super(message,cause);
 		this.exceptionId=exceptionId;
+		this.setStackTrace(cause.getStackTrace());
 	}
 }
