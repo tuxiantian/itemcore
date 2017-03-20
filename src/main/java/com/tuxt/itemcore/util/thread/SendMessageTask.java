@@ -12,6 +12,7 @@ public class SendMessageTask {
 		this.itemService = itemService;
 	}
 	public void init() {
+		itemService.cleanProcessing();
 		SendMsgInitThread sendMsgInitThread=new SendMsgInitThread(itemService);
 		sendMsgInitThread.start();
 	}

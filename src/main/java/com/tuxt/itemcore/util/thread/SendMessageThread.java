@@ -5,7 +5,7 @@ import java.util.concurrent.Callable;
 
 import com.tuxt.itemcore.service.IItemService;
 
-public class SendMessageThread implements Callable<Integer>{
+public class SendMessageThread implements Runnable{
 
 	private IItemService itemService;
 	
@@ -28,9 +28,8 @@ public class SendMessageThread implements Callable<Integer>{
 		this.dataMap=dataMap;
 	}
 	@Override
-	public Integer call() throws Exception {
-		
-		return itemService.processItem(dataMap);
+	public void run(){
+		itemService.processItem(dataMap);
 	}
 
 }

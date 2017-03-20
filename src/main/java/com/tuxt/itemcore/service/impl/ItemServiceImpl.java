@@ -7,12 +7,14 @@ import java.util.Map;
 import com.ai.common.xml.util.ControlConstants;
 import com.ai.frame.bean.InputObject;
 import com.ai.frame.bean.OutputObject;
+import com.ai.frame.logger.Logger;
+import com.ai.frame.logger.LoggerFactory;
 import com.tuxt.itemcore.service.IAsyncService;
 import com.tuxt.itemcore.service.IItemService;
 import com.tuxt.itemcore.util.PageUtil;
-import com.tuxt.itemcore.util.StringUtil;
 
 public class ItemServiceImpl extends BaseServiceImpl implements IItemService{
+	private static final Logger logger = LoggerFactory.getServiceLog(ItemServiceImpl.class);
 	private final static String NAMESPACE="item";
 	private IAsyncService asyncService;
 	public void setAsyncService(IAsyncService asyncService) {
@@ -101,7 +103,11 @@ public class ItemServiceImpl extends BaseServiceImpl implements IItemService{
 			outputObject.setReturnMessage("更新出错了");
 		}
 		return outputObject;
-	}	
+	}		
+	public void cleanProcessing(){
+		Integer count = getBaseDao().update(NAMESPACE, "cleanProcessing", null);
+		logger.info("cleanProcessing", count.toString());
+	}
 	public OutputObject personAudit(InputObject inputObject, OutputObject outputObject) throws Exception {
 		asyncService.asyncPersonAudit(inputObject, outputObject);
 		outputObject.setReturnCode(ControlConstants.RETURN_CODE.IS_OK);
@@ -109,7 +115,11 @@ public class ItemServiceImpl extends BaseServiceImpl implements IItemService{
 		return outputObject;
 	}
 	public List<Map<String, Object>> queryNoProcess(){
-		return getBaseDao().query(NAMESPACE, "queryNoProcess");
+		List<Map<String, Object>> noProcessList = getBaseDao().query(NAMESPACE, "queryNoProcess");
+		InputObject in=new InputObject();
+		in.setBeans(noProcessList);
+		getBaseDao().batchUpdate(NAMESPACE, "markNoprocess", in);
+		return noProcessList;
 	}
 	public Integer processItem(Map<String, Object> map) {
 		try {

@@ -14,6 +14,10 @@ public interface IItemService {
 			OutputObject outputObject);
 	public OutputObject cleanMarkItems(InputObject inputObject,
 			OutputObject outputObject);
+	/**
+	 * 系统启动后首先将上一次处理中的工单标记为未处理
+	 */
+	public void cleanProcessing();
 	public OutputObject personAudit(InputObject inputObject, OutputObject outputObject) throws Exception ;
 	
 	public List<Map<String, Object>> queryNoProcess();
