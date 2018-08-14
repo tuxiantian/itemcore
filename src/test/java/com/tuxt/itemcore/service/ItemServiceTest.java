@@ -7,8 +7,6 @@ import junit.framework.TestCase;
 
 import com.ai.frame.bean.InputObject;
 import com.ai.frame.bean.OutputObject;
-import com.tuxt.itemcore.util.thread.ThreadPoolConfig;
-import com.tuxt.itemcore.util.thread.ThreadPoolFactory;
 
 
 public class ItemServiceTest extends BaseServiceTest{
