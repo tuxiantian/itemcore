@@ -21,44 +21,53 @@
 	<bean id="baseService" class="com.tuxt.itemcore.service.impl.BaseServiceImpl">
 		<property name="baseDao" ref="baseDao" />
 	</bean>
-	
-	<bean id="ftpService" class="com.tuxt.itemcore.service.impl.FtpServiceImpl" parent="baseService"></bean>
-	<bean id="loginService" class="com.tuxt.itemcore.service.impl.LoginServiceImpl" parent="baseService"></bean>
-	<bean id="itemService" class="com.tuxt.itemcore.service.impl.ItemServiceImpl" parent="baseService">
-	<property name="asyncService" ref="asyncService"></property>
+
+	<bean id="ftpService" class="com.tuxt.itemcore.service.impl.FtpServiceImpl"
+		parent="baseService"></bean>
+	<bean id="loginService" class="com.tuxt.itemcore.service.impl.LoginServiceImpl"
+		parent="baseService"></bean>
+	<bean id="itemService" class="com.tuxt.itemcore.service.impl.ItemServiceImpl"
+		parent="baseService">
+		<property name="asyncService" ref="asyncService"></property>
 	</bean>
-	<bean id="itemCategoryService" class="com.tuxt.itemcore.service.impl.ItemCategoryServiceImpl" parent="baseService"></bean>
-	<bean id="grabItemService" class="com.tuxt.itemcore.service.impl.GrabItemServiceImpl" parent="baseService"></bean>
-	<!-- <bean id="queryItemQueue" class="com.tuxt.itemcore.util.thread.QueryItemQueue" init-method="initQueue"> 
-	<property name="grabItemService" ref="grabItemService"></property>
-	</bean>-->
-	<bean id="asyncService" class="com.tuxt.itemcore.service.impl.AsyncServiceImpl" parent="baseService"></bean>
-	<!-- <bean id="cacheService" class="com.tuxt.itemcore.service.impl.CacheServiceImpl" parent="baseService" init-method="init"></bean> -->
+	<bean id="itemCategoryService" class="com.tuxt.itemcore.service.impl.ItemCategoryServiceImpl"
+		parent="baseService"></bean>
+	<bean id="grabItemService" class="com.tuxt.itemcore.service.impl.GrabItemServiceImpl"
+		parent="baseService"></bean>
+	<!-- <bean id="queryItemQueue" class="com.tuxt.itemcore.util.thread.QueryItemQueue" 
+		init-method="initQueue"> <property name="grabItemService" ref="grabItemService"></property> 
+		</bean> -->
+	<bean id="asyncService" class="com.tuxt.itemcore.service.impl.AsyncServiceImpl"
+		parent="baseService"></bean>
+	<!-- <bean id="cacheService" class="com.tuxt.itemcore.service.impl.CacheServiceImpl" 
+		parent="baseService" init-method="init"></bean> -->
 	<bean id="cfgTaskService" class="com.tuxt.itemcore.service.impl.CfgTaskServiceImpl"
 		parent="baseService" />
-		<bean id="taskLogService" class="com.tuxt.itemcore.service.impl.TaskLogServiceImpl"
+	<bean id="taskLogService" class="com.tuxt.itemcore.service.impl.TaskLogServiceImpl"
 		parent="baseService" />
-		<bean id="springApplication" class="com.tuxt.itemcore.util.SpringApplicationUtil"/>
-		<!-- 多线程开始 -->
+	<bean id="springApplication" class="com.tuxt.itemcore.util.SpringApplicationUtil" />
+	<!-- 多线程开始 -->
 
-		<!-- 启动线程池执行任务的入口 -->
-		<bean id="sendMessageTask" class="com.tuxt.itemcore.util.thread.SendMessageTask" init-method="init">
-			<property name="itemService" ref="itemService"></property>
-			<property name="taskExecutor" ref="taskExecutor"></property>
-		</bean>
-		<!-- 多线程结束 -->
-		<bean id="taskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
-			<!-- 线程池维护线程的最少数量 -->
-			<property name="corePoolSize" value="10"/>
-			<!-- 允许的空闲时间 -->
-			<property name="keepAliveSeconds" value="200"/>
-			<!-- 线程池维护线程的最大数量 -->
-			<property name="maxPoolSize" value="50"/>
-			<!-- 缓存队列 -->
-			<property name="queueCapacity" value="100"/>
-			<!-- 对拒绝task的处理策略 -->
-			<property name="rejectedExecutionHandler">
-				<bean class="java.util.concurrent.ThreadPoolExecutor$CallerRunsPolicy"/>
-			</property>
-		</bean>
+	<!-- 启动线程池执行任务的入口 -->
+	<bean id="sendMessageTask" class="com.tuxt.itemcore.util.thread.SendMessageTask"
+		init-method="init">
+		<property name="itemService" ref="itemService"></property>
+		<property name="taskExecutor" ref="taskExecutor"></property>
+	</bean>
+	<!-- 多线程结束 -->
+	<bean id="taskExecutor"
+		class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+		<!-- 线程池维护线程的最少数量 -->
+		<property name="corePoolSize" value="10" />
+		<!-- 允许的空闲时间 -->
+		<property name="keepAliveSeconds" value="200" />
+		<!-- 线程池维护线程的最大数量 -->
+		<property name="maxPoolSize" value="50" />
+		<!-- 缓存队列 -->
+		<property name="queueCapacity" value="100" />
+		<!-- 对拒绝task的处理策略 -->
+		<property name="rejectedExecutionHandler">
+			<bean class="java.util.concurrent.ThreadPoolExecutor$CallerRunsPolicy" />
+		</property>
+	</bean>
 </beans>

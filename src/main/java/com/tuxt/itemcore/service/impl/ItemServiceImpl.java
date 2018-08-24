@@ -118,9 +118,10 @@ public class ItemServiceImpl extends BaseServiceImpl implements IItemService{
 		List<Map<String, Object>> noProcessList = getBaseDao().query(NAMESPACE, "queryNoProcess");
 		InputObject in=new InputObject();
 		in.setBeans(noProcessList);
-		getBaseDao().batchUpdate(NAMESPACE, "markNoprocess", in);
+		getBaseDao().batchUpdate(NAMESPACE, "markProcessing", in);
 		return noProcessList;
 	}
+	
 	public Integer processItem(Map<String, Object> map) {
 		try {
 			/*if (map.get("title").equals("title25")) {
